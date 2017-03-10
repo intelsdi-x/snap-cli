@@ -1,0 +1,47 @@
+hash: a3b5246c66a2272d2d344653754fb3b79a9ff7538b2ac6b3f35b9743440595f1
+updated: 2017-03-01T12:56:35.433338978-08:00
+imports:
+- name: github.com/armon/go-metrics
+  version: 3df31a1ada83e310c2e24b267c8e8b68836547b4
+- name: github.com/asaskevich/govalidator
+  version: 9699ab6b38bee2e02cd3fe8b99ecf67665395c96
+- name: github.com/hashicorp/go-msgpack
+  version: fa3f63826f7c23912c15263591e65d54d080b458
+  subpackages:
+  - codec
+- name: github.com/hashicorp/memberlist
+  version: a93fbd426dd831f5a66db3adc6a5ffa6f44cc60a
+- name: github.com/intelsdi-x/snap
+  version: 85079bc6f854bc9dfa00921d111e0e5fbec4943b
+  subpackages:
+  - control/plugin/cpolicy
+  - core
+  - core/cdata
+  - core/ctypes
+  - core/serror
+  - mgmt/rest/client
+  - mgmt/rest/v1/rbody
+  - mgmt/tribe/agreement
+  - pkg/ctree
+  - pkg/schedule
+  - pkg/stringutils
+  - scheduler/wmap
+- name: github.com/robfig/cron
+  version: 32d9c273155a0506d27cf73dd1246e86a470997e
+- name: github.com/Sirupsen/logrus
+  version: be52937128b38f1d99787bb476c789e2af1147f1
+- name: github.com/urfave/cli
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+- name: github.com/urfave/negroni
+  version: c7477ad8e330bef55bf1ebe300cf8aa67c492d1b
+- name: golang.org/x/crypto
+  version: aedad9a179ec1ea11b7064c57cbc6dc30d7724ec
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  subpackages:
+  - unix
+- name: gopkg.in/yaml.v2
+  version: c1cd2254a6dd314c9d73c338c12688c9325d85c6
+testImports: []
