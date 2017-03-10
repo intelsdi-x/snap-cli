@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/intelsdi-x/snap-client-go/client/operations"
+	"github.com/intelsdi-x/snap-client-go/snap"
 	"github.com/urfave/cli"
 )
 
@@ -63,12 +63,12 @@ func getConfig(ctx *cli.Context) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
 	defer w.Flush()
 
-	params := operations.NewGetPluginConfigItemParams()
+	params := snap.NewGetPluginConfigItemParams()
 	params.SetPtype(ptyp)
 	params.SetPname(pname)
 	params.SetPversion(int64(pver))
 
-	resp, err := getOperationsClient().GetPluginConfigItem(params)
+	resp, err := snapClient.GetPluginConfigItem(params)
 	if err != nil {
 		return fmt.Errorf("Error requesting plugin config %v", err.Error())
 	}

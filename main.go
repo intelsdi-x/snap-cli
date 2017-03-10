@@ -27,6 +27,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/intelsdi-x/snap-cli/snaptel"
+	"github.com/intelsdi-x/snap-client-go/snap"
 	"github.com/urfave/cli"
 )
 
@@ -64,7 +65,8 @@ func beforeAction(ctx *cli.Context) error {
 	if err != nil {
 		glog.Fatal(err)
 	}
-	snaptel.SetOperationsClient(snaptel.GetOperationClient(u.Host, snaptel.FlAPIVer.Value, u.Scheme))
+
+	snaptel.SetClient(snap.New(snap.ClientParams{URL: u.Host, APIVer: snaptel.FlAPIVer.Value, Scheme: u.Scheme}))
 
 	return nil
 }

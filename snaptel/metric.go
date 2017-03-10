@@ -28,8 +28,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/intelsdi-x/snap-client-go/client/operations"
 	"github.com/intelsdi-x/snap-client-go/models"
+	"github.com/intelsdi-x/snap-client-go/snap"
 	"github.com/urfave/cli"
 )
 
@@ -50,9 +50,8 @@ func listMetrics(ctx *cli.Context) error {
 		ns = "/*"
 	}
 
-	params := operations.NewGetMetricsParams()
-
-	resp, err := getOperationsClient().GetMetrics(params)
+	params := snap.NewGetMetricsParams()
+	resp, err := snapClient.GetMetrics(params)
 	if err != nil {
 		return fmt.Errorf("Error getting metrics: %v", err)
 	}
@@ -162,12 +161,12 @@ func getMetric(ctx *cli.Context) error {
 	ns := ctx.String("metric-namespace")
 	ver := ctx.Int("metric-version")
 
-	params := operations.NewGetMetricsParams()
+	params := snap.NewGetMetricsParams()
 	params.SetNs(&ns)
 	ver64 := int64(ver)
 	params.SetVer(&ver64)
 
-	resp, err := getOperationsClient().GetMetrics(params)
+	resp, err := snapClient.GetMetrics(params)
 	if err != nil {
 		return fmt.Errorf("Error getting metrics: %v", err)
 	}

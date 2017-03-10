@@ -28,7 +28,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/intelsdi-x/snap-client-go/client/operations"
+	"github.com/intelsdi-x/snap-client-go/snap"
 	"github.com/urfave/cli"
 )
 
@@ -46,7 +46,7 @@ func loadPlugin(ctx *cli.Context) error {
 		paths = append(paths, pAsc)
 	}
 
-	params := operations.NewLoadPluginParams()
+	params := snap.NewLoadPluginParams()
 	f, err := os.Open(strings.Join(paths, "/"))
 	if err != nil {
 		fmt.Printf("No plugin to load: %v", err)
@@ -54,7 +54,7 @@ func loadPlugin(ctx *cli.Context) error {
 	defer f.Close()
 	params.SetPluginData(f)
 
-	resp, err := getOperationsClient().LoadPlugin(params)
+	resp, err := snapClient.LoadPlugin(params)
 	if err != nil {
 		return fmt.Errorf("Error loading plugin:\n%v", err.Error())
 	}
@@ -88,16 +88,16 @@ func unloadPlugin(ctx *cli.Context) error {
 		return newUsageError("Must provide plugin version", ctx)
 	}
 
-	if getOperationsClient() == nil {
+	if snapClient == nil {
 		return errors.New(errNoClient)
 	}
 
-	params := operations.NewUnloadPluginParams()
+	params := snap.NewUnloadPluginParams()
 	params.SetPname(pName)
 	params.SetPtype(pType)
 	params.SetPversion(int64(pVer))
 
-	_, err = getOperationsClient().UnloadPlugin(params)
+	_, err = snapClient.UnloadPlugin(params)
 	if err != nil {
 		return fmt.Errorf("Error unloading plugin:\n%v", err.Error())
 	}
@@ -111,12 +111,12 @@ func unloadPlugin(ctx *cli.Context) error {
 }
 
 func listPlugins(ctx *cli.Context) error {
-	if getOperationsClient() == nil {
+	if snapClient == nil {
 		return errors.New(errNoClient)
 	}
 
-	params := operations.NewGetPluginsParams()
-	resp, err := getOperationsClient().GetPlugins(params)
+	params := snap.NewGetPluginsParams()
+	resp, err := snapClient.GetPlugins(params)
 	if err != nil {
 		return fmt.Errorf("Error: %v", err.Error())
 	}

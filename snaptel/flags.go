@@ -25,9 +25,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+// FlURL to FlTimeout are Main flags
 var (
-
-	// Main flags
 	FlURL = cli.StringFlag{
 		Name:   "url, u",
 		Usage:  "Sets the URL to use",
@@ -38,7 +37,7 @@ var (
 		Name:   "api-version, a",
 		Usage:  "The Snap API version",
 		EnvVar: "SNAP_API_VERSION",
-		Value:  "v1",
+		Value:  "v2",
 	}
 	FlSecure = cli.BoolFlag{
 		Name:   "insecure",
