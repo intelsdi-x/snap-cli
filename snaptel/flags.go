@@ -50,7 +50,7 @@ var (
 	}
 	FlPassword = cli.BoolFlag{
 		Name:   "password, p",
-		Usage:  "Require password for REST API authentication",
+		Usage:  "Require password for REST API authentication. e.g. snaptel -p plugin list",
 		EnvVar: "SNAP_REST_PASSWORD",
 	}
 	FlConfig = cli.StringFlag{

@@ -68,6 +68,7 @@ func beforeAction(ctx *cli.Context) error {
 
 	c := client.NewHTTPClientWithConfig(nil, &client.TransportConfig{Host: u.Host, BasePath: snaptel.FlAPIVer.Value, Schemes: []string{u.Scheme}})
 	snaptel.SetClient(c)
+	snaptel.SetAuthInfo(snaptel.BasicAuth(ctx))
 
 	return nil
 }
