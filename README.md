@@ -263,7 +263,6 @@ $ snaptel plugin load /opt/snap/plugins/snap-plugin-processor-passthru
 $ snaptel plugin load /opt/snap/plugins/snap-plugin-publisher-mock-file
 $ snaptel plugin list
 $ snaptel plugin list --running
-$ snaptel plugin swap <path_to_be_loaded_plugin> -t <plugin_type> -n <plugin_name> -v <plugin_version>
 $ snaptel metric list
 $ snaptel metric list --verbose
 $ snaptel metric get -m /intel/mock/foo
@@ -280,3 +279,25 @@ $ snaptel task export <task_id>
 $ snaptel task stop <task_id>
 ```
 
+### Basic Authentication
+
+In one terminal window, run snapteld (log level is set to 1, signing is turned off, specify --rest-auth flag):
+```
+$ snapteld -l 1 -t 0 --rest-auth
+...
+What password do you want to use for authentication?
+Password:snap
+```
+
+snaptel will have to use the _`same password`_ that used to start snapteld. In another terminal:
+1. list plugins
+2. list metrics
+3. load a plugin
+4. create a task
+
+```
+$ snaptel -p plugin list
+$ snaptel -p metric list
+$ snaptel -p plugin load /opt/snap/plugins/snap-plugin-collector-mock1
+$ snaptel -p task create -t mock-file.yml
+```

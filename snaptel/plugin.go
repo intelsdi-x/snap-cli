@@ -54,7 +54,7 @@ func loadPlugin(ctx *cli.Context) error {
 	defer f.Close()
 	params.SetPluginData(f)
 
-	resp, err := client.Plugins.LoadPlugin(params)
+	resp, err := client.Plugins.LoadPlugin(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -102,7 +102,7 @@ func unloadPlugin(ctx *cli.Context) error {
 	params.SetPtype(pType)
 	params.SetPversion(int64(pVer))
 
-	_, err = client.Plugins.UnloadPlugin(params)
+	_, err = client.Plugins.UnloadPlugin(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -122,7 +122,7 @@ func listPlugins(ctx *cli.Context) error {
 		params.SetRunning(&running)
 	}
 
-	resp, err := client.Plugins.GetPlugins(params)
+	resp, err := client.Plugins.GetPlugins(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}

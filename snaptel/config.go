@@ -67,7 +67,7 @@ func getConfig(ctx *cli.Context) error {
 	params.SetPname(pname)
 	params.SetPversion(int64(pver))
 
-	resp, err := client.Plugins.GetPluginConfigItem(params)
+	resp, err := client.Plugins.GetPluginConfigItem(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}

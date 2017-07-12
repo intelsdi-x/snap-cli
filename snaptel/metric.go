@@ -180,7 +180,7 @@ func queryMetrics(ctx *cli.Context) ([]*models.Metric, error) {
 		params.SetVer(&ver64)
 	}
 
-	resp, err := client.Plugins.GetMetrics(params)
+	resp, err := client.Plugins.GetMetrics(params, authInfoWriter)
 	if err != nil {
 		return nil, getErrorDetail(err, ctx)
 	}

@@ -382,7 +382,7 @@ func createTaskUsingTaskManifest(ctx *cli.Context) error {
 	params := tasks.NewAddTaskParamsWithTimeout(FlTimeout.Value)
 	params.SetTask(tsk)
 
-	resp, err := client.Tasks.AddTask(params)
+	resp, err := client.Tasks.AddTask(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -432,7 +432,7 @@ func createTaskUsingWFManifest(ctx *cli.Context) error {
 	params := tasks.NewAddTaskParamsWithTimeout(FlTimeout.Value)
 	params.SetTask(tsk)
 
-	resp, err := client.Tasks.AddTask(params)
+	resp, err := client.Tasks.AddTask(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -476,7 +476,7 @@ func mergeDateTime(tm, dt string) *time.Time {
 
 func listTask(ctx *cli.Context) error {
 	params := tasks.NewGetTasksParamsWithTimeout(FlTimeout.Value)
-	resp, err := client.Tasks.GetTasks(params)
+	resp, err := client.Tasks.GetTasks(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -544,7 +544,7 @@ func startTask(ctx *cli.Context) error {
 	params.SetID(id)
 	params.SetAction("start")
 
-	_, err := client.Tasks.UpdateTaskState(params)
+	_, err := client.Tasks.UpdateTaskState(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -566,7 +566,7 @@ func stopTask(ctx *cli.Context) error {
 	params.SetID(id)
 	params.SetAction("stop")
 
-	_, err := client.Tasks.UpdateTaskState(params)
+	_, err := client.Tasks.UpdateTaskState(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -587,7 +587,7 @@ func removeTask(ctx *cli.Context) error {
 	params := tasks.NewRemoveTaskParamsWithTimeout(FlTimeout.Value)
 	params.SetID(id)
 
-	_, err := client.Tasks.RemoveTask(params)
+	_, err := client.Tasks.RemoveTask(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -609,7 +609,7 @@ func enableTask(ctx *cli.Context) error {
 	params.SetID(id)
 	params.SetAction("enable")
 
-	_, err := client.Tasks.UpdateTaskState(params)
+	_, err := client.Tasks.UpdateTaskState(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
@@ -627,7 +627,7 @@ func exportTask(ctx *cli.Context) error {
 	params := tasks.NewGetTaskParamsWithTimeout(FlTimeout.Value)
 	params.SetID(id)
 
-	resp, err := client.Tasks.GetTask(params)
+	resp, err := client.Tasks.GetTask(params, authInfoWriter)
 	if err != nil {
 		return getErrorDetail(err, ctx)
 	}
