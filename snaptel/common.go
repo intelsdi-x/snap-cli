@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"golang.org/x/crypto/ssh/terminal"
 
@@ -39,6 +40,7 @@ var (
 	client         *snapClient.Snap
 	authInfoWriter runtime.ClientAuthInfoWriter
 	password       string
+	scheme         string
 )
 
 // UsageError defines the error message and CLI context
@@ -61,7 +63,7 @@ func newUsageError(s string, ctx *cli.Context) UsageError {
 	return UsageError{s, ctx}
 }
 
-// SetClient provides a way to set the private snapClient in this package.
+// SetClient sets the private HTTP Client in this package.
 func SetClient(cl *snapClient.Snap) {
 	client = cl
 }
@@ -69,6 +71,11 @@ func SetClient(cl *snapClient.Snap) {
 // SetAuthInfo sets the runtime ClientAuthInfoWriter.
 func SetAuthInfo(aw runtime.ClientAuthInfoWriter) {
 	authInfoWriter = aw
+}
+
+// SetScheme sets the request protocol.
+func SetScheme(s string) {
+	scheme = s
 }
 
 // GetFirstChar gets the first character of a giving string.
@@ -142,6 +149,10 @@ func getErrorDetail(err error, ctx *cli.Context) error {
 	case *tasks.UpdateTaskStateUnauthorized:
 		return newUsageError(fmt.Sprintf("%v", err.(*tasks.UpdateTaskStateUnauthorized).Payload.Message), ctx)
 	default:
+		// this is a hack
+		if strings.Contains(err.Error(), "tls: oversized record") || strings.Contains(err.Error(), "malformed HTTP response") {
+			return newUsageError(extractError(err.Error()), ctx)
+		}
 		return newUsageError(fmt.Sprintf("Error: %v", err), ctx)
 	}
 }
@@ -209,4 +220,20 @@ func BasicAuth(ctx *cli.Context) runtime.ClientAuthInfoWriter {
 		return openapiclient.BasicAuth(u, p)
 	}
 	return nil
+}
+
+// extractError is a hack for SSL/TLS handshake error.
+func extractError(m string) string {
+	ts := strings.Split(m, "\"")
+
+	var tss []string
+	if len(ts) > 0 {
+		tss = strings.Split(ts[0], "malformed")
+	}
+
+	errMsg := "Error connecting to API. Do you have an http/https mismatching API request?"
+	if len(tss) > 0 {
+		errMsg = tss[0] + errMsg
+	}
+	return errMsg
 }

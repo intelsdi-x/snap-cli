@@ -301,3 +301,97 @@ $ snaptel -p metric list
 $ snaptel -p plugin load /opt/snap/plugins/snap-plugin-collector-mock1
 $ snaptel -p task create -t mock-file.yml
 ```
+
+### Secure GRPC plugins
+Snap supports TLS for GRPC plugins. Referring to [secure plugin communication](https://github.com/intelsdi-x/snap/blob/master/docs/SECURE_PLUGIN_COMMUNICATION.md) for details. How to setup TLS on both server and client? The [Setup TLS Certificates](https://github.com/intelsdi-x/snap/blob/master/docs/SETUP_TLS_CERTIFICATES.md) has everything.
+
+#### Sample Use Cases
+
+Here is a list of good and bad command use cases.  
+
+| Flag | Description |
+| ------ | ------ |
+| tls-cert | TLS client certificate |
+| tls-key | TLS client private key |
+| ca-cert-paths | TLS client CA certificates |
+| plugin-cert | TLS server certificate |
+| plugin-key | TLS server private key |
+| plugin-ca-certs  | TLS server CA certificates |
+
+##### Case 1: Start `snapteld` with TLS certs  
+
+Snap is a client for all GRPC plugins. Note that Snap loads CA certificates from your OS certificate trust store if it's not specified.
+
+```sh
+$snapteld  -t 0 -l 1  --tls-cert snaptest-cli.crt --tls-key snaptest-cli.key --ca-cert-paths snaptest-ca.crt
+```
+##### Case 1: Run `snaptel`
+
+```sh
+▶  snaptel  plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Error: Both plugin certification and key are mandatory. The request has to use HTTPS
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+```
+
+> :collision: Urgh! Loading a secured GRPC plugin has to use HTTPS
+
+```sh
+▶ snaptel --url https://localhost:8181 plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs  snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Error: Error: Post https://localhost:8181/v2/plugins: http: server gave HTTP response to HTTPS client
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+```
+
+> :collision: Urgh! The server was not started using HTTPs
+
+##### Case 2: Start `snapteld` with TLS certs and HTTPS  
+
+Snap only requires the verificate of HTTPS's server certificate.
+
+```sh
+▶ snapteld  -t 0 -l 1 --rest-https --rest-cert snaphttps-srv.crt --rest-key snaphttps-srv.key --tls-cert snaptest-cli.crt --tls-key snaptest-cli.key --ca-cert-paths snaptest-ca.crt
+```
+
+> :white_check_mark: using this setting to start `snapteld` for a seured GRPC plugin communication.
+
+##### Case 2: Run `snaptel`  
+
+```sh
+▶ snaptel --url https://localhost:8181 plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Error: Error: Post https://localhost:8181/v2/plugins: x509: certificate signed by unknown authority
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+```
+
+> :collision: Urgh! HTTPS does not have a trusted CA. There is no way to specify a CA using a flag for HTTPS currently. Putting the trusted CA in your OS trust store in production. Using --insecure flag for your testing convenience.
+
+```sh
+▶ snaptel --url https://localhost:8181 --insecure plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Plugin loaded
+Name: test-rand-collector
+Version: 1
+Type: collector
+Signed: false
+Loaded Time: Wed, 02 Aug 2017 15:23:09 PDT
+```
+
+>:white_check_mark: The secured GRPC plugin loaded!  You may omit the `plugin-ca-certs` flag if it's in the trust store of your OS/App.  
+
+Only loading a GRPC plugin requires TLS certs. Not any other commands.
+
+```sh
+▶ snaptel --url https://localhost:8181 --insecure plugin list
+NAME 			 VERSION 	 TYPE 		 SIGNED 	 STATUS 	 LOADED TIME
+test-rand-collector 	 1 		 collector 	 false 		 loaded 	 Wed, 02 Aug 2017 15:23:09 PDT
+```
+
+##### Case 3: Caveat
+
+Starting `snapteld` same as case 2. Loading a non GRPC plugin.
+
+```sh
+▶ snaptel --url https://localhost:8181 --insecure plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap/build/darwin/x86_64/plugins/snap-plugin-collector-mock1
+Error: secure framework can't connect to insecure plugin; plugin_name: mock
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+```
+
+>:collision: Urgh! Currently, no TLS is available for non-grpc plugins. Restarting `snapteld` without TLS to load non-grpc plugins.
+

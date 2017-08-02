@@ -20,11 +20,14 @@ limitations under the License.
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"sort"
 
+	openapiclient "github.com/go-openapi/runtime/client"
 	"github.com/golang/glog"
 	"github.com/intelsdi-x/snap-cli/snaptel"
 	"github.com/intelsdi-x/snap-client-go/client"
@@ -34,6 +37,10 @@ import (
 var (
 	gitversion string
 )
+
+type tlsClientOptions struct {
+	insecureSkipVerify bool
+}
 
 func main() {
 	app := cli.NewApp()
@@ -66,11 +73,28 @@ func beforeAction(ctx *cli.Context) error {
 		glog.Fatal(err)
 	}
 
-	c := client.NewHTTPClientWithConfig(nil, &client.TransportConfig{Host: u.Host, BasePath: snaptel.FlAPIVer.Value, Schemes: []string{u.Scheme}})
+	tlcOpts := tlsClientOptions{insecureSkipVerify: ctx.Bool("insecure")}
+	tlcClient := tlsClient(tlcOpts)
+	rt := openapiclient.NewWithClient(u.Host, snaptel.FlAPIVer.Value, []string{u.Scheme}, tlcClient)
+	c := client.New(rt, nil)
 	snaptel.SetClient(c)
+	snaptel.SetScheme(u.Scheme)
 	snaptel.SetAuthInfo(snaptel.BasicAuth(ctx))
 
 	return nil
+}
+
+// tlsClient creates a http.Client
+func tlsClient(opts tlsClientOptions) *http.Client {
+	transport := tlsTransport(opts)
+	return &http.Client{Transport: transport}
+}
+
+func tlsTransport(opts tlsClientOptions) http.RoundTripper {
+	cfg := &tls.Config{}
+	cfg.InsecureSkipVerify = opts.insecureSkipVerify
+	cfg.BuildNameToCertificate()
+	return &http.Transport{TLSClientConfig: cfg}
 }
 
 // ByCommand contains array of CLI commands.
