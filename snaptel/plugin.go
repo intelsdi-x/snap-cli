@@ -170,13 +170,13 @@ func listPlugins(ctx *cli.Context) error {
 	return nil
 }
 
-func hasValidFlags(key, cert bool, scheme string) bool {
-	// Validats TLS plugin load flags
-	if key && cert && scheme == "https" {
+func hasValidFlags(key, cert bool) bool {
+	// Validats TLS plugin loading mandatory flags.
+	if key && cert {
 		return true
 	}
 
-	// Don't block normal flow
+	// Don't block normal flow which has not certs at all.
 	if !key && !cert {
 		return true
 	}
