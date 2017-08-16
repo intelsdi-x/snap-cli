@@ -335,7 +335,9 @@ Signed: false
 Loaded Time: Mon, 14 Aug 2017 22:25:16 PDT
 ```
 
-##### Error One
+Notice that only GRPC plugins are supported. There is also a requirement to use trusted CA and providing both plugin-cert and plugin-key. Below common error messages are presented that you might receive if one of those requirements are not fulfilled.
+
+##### Case 1: Missing plugin key
 
 ```sh
 ▶ snaptel plugin load --plugin-cert=snaptest-srv.crt  --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
@@ -343,10 +345,7 @@ Error: Both plugin certification and key are mandatory.
 Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
 ```
 
-> What happened: Both `plugin-cert` and `plugin-key` are mandatory.
-
-
-##### Error Two
+##### Case 2: Using untrusted CA
 
 ```sh
 ▶ snaptel plugin load --plugin-cert=snaptest-srv.crt --plugin-key=snaptest-srv.key --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
@@ -355,15 +354,11 @@ Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin
 
 ```
 
-> What happened: Did you start `snapteld` with CA cert or put the trusted CA in your OS/APP trust store?
-
-##### Error Three
+##### Case 3: Trying to set TLS GRPC communication for non-GRPC plugin
 
 ```sh
 ▶ snaptel plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap/snap-plugin-collector-mock1
 Error: secure framework can't connect to insecure plugin; plugin_name: mock
 Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
 ```
-
->What happened: The TLS is only supported for GRPC plugins. Restarting `snapteld` without TLS to load non-GRPC plugins.
 
