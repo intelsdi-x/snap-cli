@@ -73,9 +73,9 @@ func beforeAction(ctx *cli.Context) error {
 		glog.Fatal(err)
 	}
 
-	tlcOpts := tlsClientOptions{insecureSkipVerify: ctx.Bool("insecure")}
-	tlcClient := tlsClient(tlcOpts)
-	rt := openapiclient.NewWithClient(u.Host, snaptel.FlAPIVer.Value, []string{u.Scheme}, tlcClient)
+	tlsOpts := tlsClientOptions{insecureSkipVerify: ctx.Bool("insecure")}
+	tlsClient := tlsClient(tlsOpts)
+	rt := openapiclient.NewWithClient(u.Host, snaptel.FlAPIVer.Value, []string{u.Scheme}, tlsClient)
 	c := client.New(rt, nil)
 	snaptel.SetClient(c)
 	snaptel.SetScheme(u.Scheme)
