@@ -51,12 +51,45 @@ func loadPlugin(ctx *cli.Context) error {
 		}
 
 		params := plugins.NewLoadPluginParamsWithTimeout(FlTimeout.Value)
-		f, err := os.Open(filepath.Join(paths...))
+
+		// Sets the plugin data.
+		f, err := os.Open(filepath.Join(paths[0]))
 		if err != nil {
 			return newUsageError("Cannot open the plugin", ctx)
 		}
 		defer f.Close()
 		params.SetPluginData(f)
+
+		if !hasValidFlags(ctx.IsSet("plugin-cert"), ctx.IsSet("plugin-key")) {
+			return newUsageError("Both plugin certification and key are mandatory.", ctx)
+		}
+
+		// Sets the plugin certificate.
+		if ctx.IsSet("plugin-cert") {
+			pCert := ctx.String("plugin-cert")
+			if _, err := os.Stat(pCert); os.IsNotExist(err) {
+				return newUsageError("Cannot reach the plugin certificate", ctx)
+			}
+			params.SetPluginCert(&pCert)
+		}
+
+		// Sets the plugin key.
+		if ctx.IsSet("plugin-key") {
+			pKey := ctx.String("plugin-key")
+			if _, err := os.Stat(pKey); os.IsNotExist(err) {
+				return newUsageError("Cannot reach the plugin key", ctx)
+			}
+			params.SetPluginKey(&pKey)
+		}
+
+		// Sets the CA ceritificate.
+		if ctx.IsSet("plugin-ca-certs") {
+			caCerts := ctx.String("plugin-ca-certs")
+			if _, err := os.Stat(caCerts); os.IsNotExist(err) {
+				return newUsageError("Cannot reach the CA certificates", ctx)
+			}
+			params.SetCaCerts(&caCerts)
+		}
 
 		resp, err := client.Plugins.LoadPlugin(params, authInfoWriter)
 		if err != nil {
@@ -176,7 +209,7 @@ func hasValidFlags(key, cert bool) bool {
 		return true
 	}
 
-	// Don't block normal flow which has not certs at all.
+	// Don't block normal flow which has no certs at all.
 	if !key && !cert {
 		return true
 	}

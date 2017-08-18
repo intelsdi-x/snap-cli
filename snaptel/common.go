@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"golang.org/x/crypto/ssh/terminal"
 
@@ -129,8 +130,6 @@ func getErrorDetail(err error, ctx *cli.Context) error {
 		return newUsageError(fmt.Sprintf("%v", err.(*plugins.GetPluginConfigItemBadRequest).Payload.ErrorMessage), ctx)
 	case *plugins.GetPluginConfigItemUnauthorized:
 		return newUsageError(fmt.Sprintf("%v", err.(*plugins.GetPluginConfigItemUnauthorized).Payload.Message), ctx)
-	case *plugins.LoadPluginDefault:
-		return newUsageError(fmt.Sprintf("%v", err.(*plugins.LoadPluginDefault).Message), ctx)
 	case *tasks.GetTaskNotFound:
 		return newUsageError(fmt.Sprintf("%v", err.(*tasks.GetTaskNotFound).Payload.ErrorMessage), ctx)
 	case *tasks.GetTaskUnauthorized:
@@ -150,6 +149,9 @@ func getErrorDetail(err error, ctx *cli.Context) error {
 	case *tasks.UpdateTaskStateUnauthorized:
 		return newUsageError(fmt.Sprintf("%v", err.(*tasks.UpdateTaskStateUnauthorized).Payload.Message), ctx)
 	default:
+		if strings.Contains(err.Error(), "tls: oversized record") || strings.Contains(err.Error(), "malformed HTTP response") {
+			return newUsageError(extractError(err.Error()), ctx)
+		}
 		return newUsageError(fmt.Sprintf("Error: %v", err), ctx)
 	}
 }
@@ -217,4 +219,20 @@ func BasicAuth(ctx *cli.Context) runtime.ClientAuthInfoWriter {
 		return openapiclient.BasicAuth(u, p)
 	}
 	return nil
+}
+
+// extractError is a hack for SSL/TLS handshake error.
+func extractError(m string) string {
+	ts := strings.Split(m, "\"")
+
+	var tss []string
+	if len(ts) > 0 {
+		tss = strings.Split(ts[0], "malformed")
+	}
+
+	errMsg := "Error connecting to API. Do you have an http/https mismatching API request?"
+	if len(tss) > 0 {
+		errMsg = tss[0] + errMsg
+	}
+	return errMsg
 }
