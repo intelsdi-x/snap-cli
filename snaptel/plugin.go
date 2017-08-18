@@ -21,6 +21,7 @@ package snaptel
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -29,37 +30,51 @@ import (
 	"time"
 
 	"github.com/intelsdi-x/snap-client-go/client/plugins"
+	"github.com/intelsdi-x/snap-client-go/models"
 	"github.com/urfave/cli"
 )
 
 func loadPlugin(ctx *cli.Context) error {
-	pAsc := ctx.String("plugin-asc")
-	var paths []string
-	if len(ctx.Args()) != 1 {
-		return newUsageError("Incorrect usage:", ctx)
-	}
-	paths = append(paths, ctx.Args().First())
-	if pAsc != "" {
-		if !strings.Contains(pAsc, ".asc") {
-			return newUsageError("Must be a .asc file for the -a flag", ctx)
+	var p *models.Plugin
+	if _, err := url.ParseRequestURI(ctx.Args().First()); err != nil {
+		pAsc := ctx.String("plugin-asc")
+		var paths []string
+		if len(ctx.Args()) != 1 {
+			return newUsageError("Incorrect usage:", ctx)
 		}
-		paths = append(paths, pAsc)
+		paths = append(paths, ctx.Args().First())
+		if pAsc != "" {
+			if !strings.Contains(pAsc, ".asc") {
+				return newUsageError("Must be a .asc file for the -a flag", ctx)
+			}
+			paths = append(paths, pAsc)
+		}
+
+		params := plugins.NewLoadPluginParamsWithTimeout(FlTimeout.Value)
+		f, err := os.Open(filepath.Join(paths...))
+		if err != nil {
+			return newUsageError("Cannot open the plugin", ctx)
+		}
+		defer f.Close()
+		params.SetPluginData(f)
+
+		resp, err := client.Plugins.LoadPlugin(params, authInfoWriter)
+		if err != nil {
+			return getErrorDetail(err, ctx)
+		}
+		p = resp.Payload
+	} else {
+		params := plugins.NewLoadPluginParamsWithTimeout(FlTimeout.Value)
+		pluginURI := ctx.Args().First()
+		params.SetPluginURI(&pluginURI)
+
+		resp, err := client.Plugins.LoadPlugin(params, authInfoWriter)
+		if err != nil {
+			return getErrorDetail(err, ctx)
+		}
+		p = resp.Payload
 	}
 
-	params := plugins.NewLoadPluginParamsWithTimeout(FlTimeout.Value)
-	f, err := os.Open(filepath.Join(paths...))
-	if err != nil {
-		return newUsageError("Cannot open the plugin", ctx)
-	}
-	defer f.Close()
-	params.SetPluginData(f)
-
-	resp, err := client.Plugins.LoadPlugin(params, authInfoWriter)
-	if err != nil {
-		return getErrorDetail(err, ctx)
-	}
-
-	p := resp.Payload
 	fmt.Println("Plugin loaded")
 	fmt.Printf("Name: %s\n", p.Name)
 	fmt.Printf("Version: %d\n", p.Version)
