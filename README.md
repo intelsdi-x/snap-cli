@@ -20,7 +20,50 @@ limitations under the License.
 # snaptel
 A Snap telemetry framework CLI
 
-## Usage
+1. [Getting Started](#getting-started)
+   * [System Requirements](#system-requirements)
+   * [Operating systems](#operating-systems)
+   * [Installation](#installation)
+2. [Documentation](#documentation)
+   * [Usage](#usage)
+   * [Global Options](#global-options)
+   * [Commands](#commands)
+   * [Command Options](#command-options)
+   * [Examples](#examples)
+3. [Basic authentication](#basic-authentication)
+4. [Secure Plugin Communication](#secure-plugin-communication)
+5. [Community Support](#community-support)
+6. [Contributing](#contributing)
+7. [License](#license)
+
+## Getting Started
+### System Requirements
+* [golang 1.7+](https://golang.org/dl/) - needed only for building
+
+### Operating systems
+All OSs currently supported by plugin:
+* Linux/amd64
+
+### Installation
+You can get the pre-built `snaptel` binary for your OS and architecture at Snap CLI's [GitHub Releases](https://github.com/intelsdi-x/snap-cli/releases) page.
+
+### To build the snap cli:
+Fork https://github.com/intelsdi-x/snap-cli
+Clone repo into `$GOPATH/src/github.com/intelsdi-x/`:
+
+```
+$ git clone https://github.com/<yourGithubID>/snap-cli.git
+```
+
+Build the plugin by running make within the cloned repo:
+```
+$ make
+```
+This builds the `snaptel` in `/build/$GOOS/$GOARCH`
+
+
+## Documentation
+### Usage
 Either copy `snaptel` to `/usr/local/sbin` and ensure `/usr/local/sbin` is in your path, or use fully qualified filepath to the `snaptel` binary:
 
 ```sh
@@ -163,10 +206,10 @@ OPTIONS:
 
 ```
 
-Example Usage
--------------
 
-### Load and unload plugins, create and start a task
+### Examples
+
+#### Load and unload plugins, create and start a task
 
 In one terminal window, run snapteld (log level is set to 1 and signing is turned off for this example):
 ```
@@ -279,86 +322,55 @@ $ snaptel task export <task_id>
 $ snaptel task stop <task_id>
 ```
 
-### Basic Authentication
+## Basic Authentication
 
-In one terminal window, run snapteld (log level is set to 1, signing is turned off, specify --rest-auth flag):
+Basic authentication is an optional authentication handler for Snap CLI.
+
+Referring to [docs/BASIC_AUTHENTICATION.md](docs/BASIC_AUTHENTICATION.md) for details.
+
+## Secure Plugin Communication
+Snap framework communicates with plugins (collectors, processors and publishers) over gRPC protocol. This communication can be secured
+by opening TLS channels and providing certificates to authenticate both sides: plugins and Snap daemon.
+
+Snap CLI exposes the following flags to allow loading the plugin together with paths to its key and certificate files which are required to setup TLS communication:
 ```
-$ snapteld -l 1 -t 0 --rest-auth
-...
-What password do you want to use for authentication?
-Password:snap
-```
+$ snaptel plugin load --help
 
-snaptel will have to use the _`same password`_ that used to start snapteld. In another terminal:
-1. list plugins
-2. list metrics
-3. load a plugin
-4. create a task
+USAGE:
+   snaptel plugin load [command options] [arguments...]
 
-```
-$ snaptel -p plugin list
-$ snaptel -p metric list
-$ snaptel -p plugin load /opt/snap/plugins/snap-plugin-collector-mock1
-$ snaptel -p task create -t mock-file.yml
-```
-
-### Secure GRPC plugins
-Snap supports TLS for GRPC plugins. Referring to [secure plugin communication](https://github.com/intelsdi-x/snap/blob/master/docs/SECURE_PLUGIN_COMMUNICATION.md) for details. How to setup TLS on both server and client? The [Setup TLS Certificates](https://github.com/intelsdi-x/snap/blob/master/docs/SETUP_TLS_CERTIFICATES.md) has everything.
-
-#### Examples
-
-##### Definition of flags
-
-| Flag | Description |
-| ------ | ------ |
-| plugin-cert | TLS server certificate |
-| plugin-key | TLS server private key |
-| plugin-ca-certs  | TLS server CA certificates |
-
-##### Starting `snapteld` 
-
-Snap is a client for all GRPC plugins. Note that Snap loads CA certificates from your OS certificate trust store if it's not specified.
-
-```sh
-$snapteld  -t 0 -l 1  --tls-cert snaptest-cli.crt --tls-key snaptest-cli.key --ca-cert-paths snaptest-ca.crt
-```
-
-##### Running `snaptel`
-
-```sh
-▶ snaptel plugin load --plugin-cert=snaptest-srv.crt --plugin-key=snaptest-srv.key --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
-Plugin loaded
-Name: test-rand-collector
-Version: 1
-Type: collector
-Signed: false
-Loaded Time: Mon, 14 Aug 2017 22:25:16 PDT
-```
-
-Notice that only GRPC plugins are supported. There is also a requirement to use trusted CA and providing both plugin-cert and plugin-key. Below common error messages are presented that you might receive if one of those requirements are not fulfilled.
-
-##### Case 1: Missing plugin key
-
-```sh
-▶ snaptel plugin load --plugin-cert=snaptest-srv.crt  --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
-Error: Both plugin certification and key are mandatory.
-Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
-```
-
-##### Case 2: Using untrusted CA
-
-```sh
-▶ snaptel plugin load --plugin-cert=snaptest-srv.crt --plugin-key=snaptest-srv.key --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
-Error: rpc error: code = Internal desc = connection error: desc = "transport: authentication handshake failed: x509: certificate signed by unknown authority"
-Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+OPTIONS:
+   --plugin-asc value, -a value       The plugin asc
+   --plugin-cert value, -c value      The path to plugin certificate file
+   --plugin-key value, -k value       The path to plugin private key file
+   --plugin-ca-certs value, -r value  List of CA cert paths (directory/file) for plugin to verify TLS clients
 
 ```
 
-##### Case 3: Trying to set TLS GRPC communication for non-GRPC plugin
 
-```sh
-▶ snaptel plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap/snap-plugin-collector-mock1
-Error: secure framework can't connect to insecure plugin; plugin_name: mock
-Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
-```
+Referring to [docs/TLS_SECURE_PLUGIN_COMMUNICATION.md](docs/TLS_SECURE_PLUGIN_COMMUNICATION.md) for details.
 
+## Community Support
+This repository is one of many in the Snap framework and [has maintainers supporting it](https://github.com/intelsdi-x/snap/blob/master/docs/MAINTAINERS.md). We love contributions from our community along the way. No improvement is too small.
+
+
+## Contributing
+We encourage contributions from the community.
+
+* _Contributors_: We always appreciate more eyes on the core framework and Snap CLIs
+* _Feedback_: try it and tell us about it on [our Slack team](https://intelsdi-x.herokuapp.com/), through [a blog posts](https://medium.com/intel-sdi/) or Twitter with #SnapTelemetry
+* _Integrations_: snap-cli uses [snap-client-go](https://github.com/intelsdi-x/snap-client-go)
+
+To contribute to the Snap framework, see our [CONTRIBUTING.md](CONTRIBUTING.md) file. To give back to a specific plugin, open an issue on its repository. Snap maintainers aim to address comments and questions as quickly as possible. To get some attention on an issue, reach out to us [on Slack](http://slack.snap-telemetry.io), or open an issue to get a conversation started.
+
+
+## Code of Conduct
+All contributors to snap-cli are expected to be helpful and encouraging to all members of the community, treating everyone with a high level of professionalism and respect. See our [code of conduct](https://github.com/intelsdi-x/snap/blob/master/CODE_OF_CONDUCT.md) for more details.
+
+
+## License
+Snap Client Go is Open Source software released under the [Apache 2.0 License](LICENSE).
+
+## Thank You
+
+And **thank you!** Your contribution, through code and participation, is incredibly important to us.
