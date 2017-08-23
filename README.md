@@ -301,3 +301,64 @@ $ snaptel -p metric list
 $ snaptel -p plugin load /opt/snap/plugins/snap-plugin-collector-mock1
 $ snaptel -p task create -t mock-file.yml
 ```
+
+### Secure GRPC plugins
+Snap supports TLS for GRPC plugins. Referring to [secure plugin communication](https://github.com/intelsdi-x/snap/blob/master/docs/SECURE_PLUGIN_COMMUNICATION.md) for details. How to setup TLS on both server and client? The [Setup TLS Certificates](https://github.com/intelsdi-x/snap/blob/master/docs/SETUP_TLS_CERTIFICATES.md) has everything.
+
+#### Examples
+
+##### Definition of flags
+
+| Flag | Description |
+| ------ | ------ |
+| plugin-cert | TLS server certificate |
+| plugin-key | TLS server private key |
+| plugin-ca-certs  | TLS server CA certificates |
+
+##### Starting `snapteld` 
+
+Snap is a client for all GRPC plugins. Note that Snap loads CA certificates from your OS certificate trust store if it's not specified.
+
+```sh
+$snapteld  -t 0 -l 1  --tls-cert snaptest-cli.crt --tls-key snaptest-cli.key --ca-cert-paths snaptest-ca.crt
+```
+
+##### Running `snaptel`
+
+```sh
+▶ snaptel plugin load --plugin-cert=snaptest-srv.crt --plugin-key=snaptest-srv.key --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Plugin loaded
+Name: test-rand-collector
+Version: 1
+Type: collector
+Signed: false
+Loaded Time: Mon, 14 Aug 2017 22:25:16 PDT
+```
+
+Notice that only GRPC plugins are supported. There is also a requirement to use trusted CA and providing both plugin-cert and plugin-key. Below common error messages are presented that you might receive if one of those requirements are not fulfilled.
+
+##### Case 1: Missing plugin key
+
+```sh
+▶ snaptel plugin load --plugin-cert=snaptest-srv.crt  --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Error: Both plugin certification and key are mandatory.
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+```
+
+##### Case 2: Using untrusted CA
+
+```sh
+▶ snaptel plugin load --plugin-cert=snaptest-srv.crt --plugin-key=snaptest-srv.key --plugin-ca-certs=snaptest-ca.crt ../snap-plugin-lib-go/rand-collector
+Error: rpc error: code = Internal desc = connection error: desc = "transport: authentication handshake failed: x509: certificate signed by unknown authority"
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+
+```
+
+##### Case 3: Trying to set TLS GRPC communication for non-GRPC plugin
+
+```sh
+▶ snaptel plugin load --plugin-cert snaptest-srv.crt --plugin-key snaptest-srv.key --plugin-ca-certs snaptest-ca.crt ../snap/snap-plugin-collector-mock1
+Error: secure framework can't connect to insecure plugin; plugin_name: mock
+Usage: load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+```
+

@@ -22,6 +22,7 @@ package snaptel
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -54,8 +55,15 @@ func watchTask(ctx *cli.Context) error {
 	// Therefore no timeout for this request.
 	req, err := http.NewRequest("GET", url, nil)
 	req.SetBasicAuth("snap", password)
-	cli := &http.Client{}
-	resp, err := cli.Do(req)
+	if err != nil {
+		return err
+	}
+
+	tr := http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	wtClient := http.Client{Transport: &tr}
+	resp, err := wtClient.Do(req)
 	if err != nil {
 		return err
 	}
