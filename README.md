@@ -67,33 +67,20 @@ This builds the `snaptel` in `/build/$GOOS/$GOARCH`
 Either copy `snaptel` to `/usr/local/sbin` and ensure `/usr/local/sbin` is in your path, or use fully qualified filepath to the `snaptel` binary:
 
 ```
-$ snaptel 
+$ snaptel [global options] command [command options] [arguments...]
 ```
 
 ### Global Options
 
 ```
-NAME:
-   snaptel - The open telemetry framework
-
-USAGE:
-   snaptel [global options] command [command options] [arguments...]
-
-VERSION:
-   all-clis-f9fa285
-
-COMMANDS:
-     help, h  Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --url value, -u value          Sets the URL to use (default: "http://localhost:8181") [$SNAP_URL]
-   --insecure                     Ignore certificate errors when Snap API is running HTTPS [$SNAP_INSECURE]
-   --api-version value, -a value  The Snap API version (default: "v2") [$SNAP_API_VERSION]
-   --password, -p                 Require password for REST API authentication [$SNAP_REST_PASSWORD]
-   --config value, -c value       Path to a config file [$SNAPTEL_CONFIG_PATH, $SNAPCTL_CONFIG_PATH]
-   --timeout value, -t value      Timeout to be set on HTTP request to the server (default: 10s)
-   --help, -h                     show help
-   --version, -v                  print the version
+--url value, -u value          Sets the URL to use (default: "http://localhost:8181") [$SNAP_URL]
+--insecure                     Ignore certificate errors when Snap API is running HTTPS [$SNAP_INSECURE]
+--api-version value, -a value  The Snap API version (default: "v2") [$SNAP_API_VERSION]
+--password, -p                 Require password for REST API authentication [$SNAP_REST_PASSWORD]
+--config value, -c value       Path to a config file [$SNAPTEL_CONFIG_PATH, $SNAPCTL_CONFIG_PATH]
+--timeout value, -t value      Timeout to be set on HTTP request to the server (default: 10s)
+--help, -h                     show help
+--version, -v                  print the version
 ```
 
 ### Commands
@@ -109,103 +96,62 @@ help, h      Shows a list of commands or help for one command
 #### plugin
 
 ```
-$ snaptel plugin
+$ snaptel plugin command [command options] [arguments...]
+```
 
-NAME:
-    -
-
-USAGE:
-    command [command options] [arguments...]
-
-COMMANDS:
-     load    load <plugin_path>
-     unload  unload <plugin_type> <plugin_name> <plugin_version>
-     list    list or list --running
-     <unload_plugin_type>:<unload_plugin_name>:<unload_plugin_version> or swap <load_plugin_path> -t <unload_plugin_type> -n <unload_plugin_name> -v <unload_plugin_version>
-     config
-
-OPTIONS:
-   --help, -h  show help
-
+```
+load    load <plugin_path> [--plugin-cert=<plugin_cert_path> --plugin-key=<plugin_key_path> --plugin-ca-certs=<ca_cert_paths>]
+unload  unload <plugin_type> <plugin_name> <plugin_version>
+list    list or list --running
+config
 ```
 
 #### metric
 
 ```
-$ snaptel metric
-
-NAME:
-    -
-
-USAGE:
-    command [command options] [arguments...]
-
-COMMANDS:
-     list  list
-     get   get -m -v
-
-OPTIONS:
-   --help, -h  show help
-
+$ snaptel metric command [command options] [arguments...]
+```
+```
+list  list
+get   get -m <namespace> or get -m <namespace> -v <version>
 ```
 
 #### task
 
 ```
-$ snaptel task
-
-NAME:
-    -
-
-USAGE:
-    command [command options] [arguments...]
-
-COMMANDS:
-     create  There are two ways to create a task.
-             1) Use a task manifest with [--task-manifest]
-             2) Provide a workflow manifest and schedule details.
-
-  * Note: Start and stop date/time are optional.
-
-     list    list or list --verbose
-     start   start <task_id>
-     stop    stop <task_id>
-     remove  remove <task_id>
-     export  export <task_id>
-     watch   watch <task_id> or watch <task_id> --verbose
-     enable  enable <task_id>
-
-OPTIONS:
-   --help, -h  show help
-
+$ snaptel task command [command options] [arguments...]
 ```
 
 ```
-$ snaptel task create -h
+create  There are two ways to create a task.
+        1) Use a task manifest with [--task-manifest]
+        2) Provide a workflow manifest and schedule details.
 
-USAGE:
-    create [command options] [arguments...]
 
-DESCRIPTION:
-   Creates a new task in the snap scheduler
+       --task-manifest value, -t value      File path for task manifest to use for task creation.
+       --workflow-manifest value, -w value  File path for workflow manifest to use for task creation
+       --interval value, -i value           Interval for the task schedule [ex (simple schedule): 250ms, 1s, 30m (cron schedule): "0 * * * * *"]
+       --count value                        The count of runs for the task schedule [defaults to 0 what means no limit, e.g. set to 1 determines a single run task]
+       --start-date value                   Start date for the task schedule [defaults to today]
+       --start-time value                   Start time for the task schedule [defaults to now]
+       --stop-date value                    Stop date for the task schedule [defaults to today]
+       --stop-time value                    Start time for the task schedule [defaults to now]
+       --name value, -n value               Optional requirement for giving task names
+       --duration value, -d value           The amount of time to run the task [appends to start or creates a start time before a stop]
+       --no-start                           Do not start task on creation [normally started on creation]
+       --deadline value                     The deadline for the task to be killed after started if the task runs too long (All tasks default to 5s)
+       --max-failures value                 The number of consecutive failures before Snap disables the task
 
-OPTIONS:
-   --task-manifest value, -t value      File path for task manifest to use for task creation.
-   --workflow-manifest value, -w value  File path for workflow manifest to use for task creation
-   --interval value, -i value           Interval for the task schedule [ex (simple schedule): 250ms, 1s, 30m (cron schedule): "0 * * * * *"]
-   --count value                        The count of runs for the task schedule [defaults to 0 what means no limit, e.g. set to 1 determines a single run task]
-   --start-date value                   Start date for the task schedule [defaults to today]
-   --start-time value                   Start time for the task schedule [defaults to now]
-   --stop-date value                    Stop date for the task schedule [defaults to today]
-   --stop-time value                    Start time for the task schedule [defaults to now]
-   --name value, -n value               Optional requirement for giving task names
-   --duration value, -d value           The amount of time to run the task [appends to start or creates a start time before a stop]
-   --no-start                           Do not start task on creation [normally started on creation]
-   --deadline value                     The deadline for the task to be killed after started if the task runs too long (All tasks default to 5s)
-   --max-failures value                 The number of consecutive failures before Snap disables the task
+        * Note: Start and stop date/time are optional.
 
+list    list or list --verbose
+start   start <task_id>
+stop    stop <task_id>
+remove  remove <task_id>
+export  export <task_id>
+watch   watch <task_id> or watch <task_id> --verbose
+enable  enable <task_id>
 ```
-
 
 ### Examples
 
@@ -369,7 +315,7 @@ All contributors to snap-cli are expected to be helpful and encouraging to all m
 
 
 ## License
-Snap Client Go is Open Source software released under the [Apache 2.0 License](LICENSE).
+Snap CLI is an Open Source software released under the [Apache 2.0 License](LICENSE).
 
 ## Thank You
 
