@@ -66,13 +66,13 @@ This builds the `snaptel` in `/build/$GOOS/$GOARCH`
 ### Usage
 Either copy `snaptel` to `/usr/local/sbin` and ensure `/usr/local/sbin` is in your path, or use fully qualified filepath to the `snaptel` binary:
 
-```sh
+```
 $ snaptel 
 ```
 
 ### Global Options
 
-```sh
+```
 NAME:
    snaptel - The open telemetry framework
 
@@ -108,7 +108,7 @@ help, h      Shows a list of commands or help for one command
 
 #### plugin
 
-```sh
+```
 $ snaptel plugin
 
 NAME:
@@ -131,7 +131,7 @@ OPTIONS:
 
 #### metric
 
-```sh
+```
 $ snaptel metric
 
 NAME:
@@ -151,7 +151,7 @@ OPTIONS:
 
 #### task
 
-```sh
+```
 $ snaptel task
 
 NAME:
@@ -180,7 +180,7 @@ OPTIONS:
 
 ```
 
-```sh
+```
 $ snaptel task create -h
 
 USAGE:
@@ -300,7 +300,7 @@ and then in another terminal:
 18. export a task
 19. stop a task
 
-```sh
+```
 $ snaptel plugin load /opt/snap/plugins/snap-plugin-collector-mock1
 $ snaptel plugin load /opt/snap/plugins/snap-plugin-processor-passthru
 $ snaptel plugin load /opt/snap/plugins/snap-plugin-publisher-mock-file
@@ -358,7 +358,7 @@ This repository is one of many in the Snap framework and [has maintainers suppor
 We encourage contributions from the community.
 
 * _Contributors_: We always appreciate more eyes on the core framework and Snap CLIs
-* _Feedback_: try it and tell us about it on [our Slack team](https://intelsdi-x.herokuapp.com/), through [a blog posts](https://medium.com/intel-sdi/) or Twitter with #SnapTelemetry
+* _Feedback_: try it and tell us about it on [our Slack team](https://intelsdi-x.herokuapp.com/) or through [a blog posts](https://medium.com/intel-sdi/)
 * _Integrations_: snap-cli uses [snap-client-go](https://github.com/intelsdi-x/snap-client-go)
 
 To contribute to the Snap framework, see our [CONTRIBUTING.md](CONTRIBUTING.md) file. To give back to a specific plugin, open an issue on its repository. Snap maintainers aim to address comments and questions as quickly as possible. To get some attention on an issue, reach out to us [on Slack](http://slack.snap-telemetry.io), or open an issue to get a conversation started.

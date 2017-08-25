@@ -24,7 +24,7 @@ limitations under the License.
   * [Examples](#examples)
 
 ### Overview
-Basic authentication is an optional authentication handler for Snap CLI. Snap daemon running with set flag `--rest-auth` requires passing password
+Basic authentication is an optional authentication handler for Snap CLI. Snap daemon running with set flag `--rest-auth` requires passing a password
 for REST API authentication on every request, as well as giving your credentials to clients.
 
 
@@ -46,8 +46,7 @@ $ snaptel -p plugin list
 Password: <your_password>
 ```
 
-If Snap's client authentication is successful what means that provided password is correct,
-the command will be executed and you will receive its results:
+If Snap's client authentication is successful (provided password is correct), requested command will be executed and its output will be returned:
 ```
 $ snaptel -p plugin list
 
@@ -57,7 +56,7 @@ NAME     VERSION         TYPE            SIGNED          STATUS          LOADED 
 cpu      7               collector       false           loaded          Fri, 25 Aug 2017 13:49:30 CEST
 ```
 
-If provided password is wrong, so Snap's client cannot be authenticated, you will receive error that your credentials are invalid:
+If Snap's client authentication is failing (provided password is incorrect), the following error message will be returned:
 
 ```
 $ snaptel -p plugin list
