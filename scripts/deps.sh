@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # File managed by pluginsync
 
 # http://www.apache.org/licenses/LICENSE-2.0.txt
 #
 #
-# Copyright 2017 Intel Corporation
+# Copyright 2016 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,3 +71,5 @@ restore_go_dep() {
 _dep=$(detect_go_dep)
 install_go_dep
 restore_go_dep
+
+_go_get github.com/go-openapi/validate

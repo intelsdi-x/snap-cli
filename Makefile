@@ -2,7 +2,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0.txt
 #
 #
-# Copyright 2017 Intel Corporation
+# Copyright 2015 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,5 +21,21 @@ default:
 	$(MAKE) all
 deps:
 	bash -c "./scripts/deps.sh"
+test:
+	bash -c "./scripts/test.sh $(TEST_TYPE)"
+test-legacy:
+	bash -c "./scripts/test.sh legacy"
+test-small:
+	bash -c "./scripts/test.sh small"
+test-medium:
+	bash -c "./scripts/test.sh medium"
+test-large:
+	bash -c "./scripts/test.sh large"
+test-all:
+	$(MAKE) test-small
+	$(MAKE) test-medium
+	$(MAKE) test-large
+check:
+	$(MAKE) test
 all:
 	bash -c "./scripts/build.sh"
