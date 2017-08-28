@@ -17,6 +17,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+[![Build Status](https://travis-ci.org/intelsdi-x/snap-cli.svg?branch=master)](https://travis-ci.org/intelsdi-x/snap-cli) 
+
 # snaptel
 A Snap telemetry framework CLI
 
