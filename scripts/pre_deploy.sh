@@ -32,7 +32,7 @@ build_path="${__proj_dir}/build"
 _info "build_path: ${build_path}"
 _debug "$(find "${build_path}")"
 
-plugin_name="${__proj_dir##*/}"
+plugin_name=snaptel
 git_sha=$(git log --pretty=format:"%H" -1)
 s3_path="${__proj_dir}/s3/${plugin_name}"
 
