@@ -59,5 +59,5 @@ if [[ "${GOOS}" == "windows" ]]; then
 fi
 
 mkdir -p "${build_path}"
-_info "building snapteld/${snaptel} for ${GOOS}/${GOARCH}"
+_info "building ${snaptel} for ${GOOS}/${GOARCH}"
 (cd "${__proj_dir}" && "${go_build[@]}" -o "${build_path}/${snaptel}" . || exit 1)

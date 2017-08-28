@@ -32,7 +32,7 @@ build_path="${__proj_dir}/build"
 _info "build_path: ${build_path}"
 _debug "$(find "${build_path}")"
 
-plugin_name="${__proj_dir##*/}"
+plugin_name=snaptel
 git_sha=$(git log --pretty=format:"%H" -1)
 s3_path="${__proj_dir}/s3/${plugin_name}"
 
@@ -44,9 +44,9 @@ if [ -z "$TRAVIS_TAG" ]; then
   mkdir -p "${git_path}"
   mkdir -p "${latest_path}"
 
-  _info "copying plugin binaries to ${git_path}"
+  _info "copying snap cli binary to ${git_path}"
   cp -rp "${build_path}/"* "${git_path}"
-  _info "copying plugin binaries to ${latest_path}"
+  _info "copying snap cli binary to ${latest_path}"
   cp -rp "${build_path}/"* "${latest_path}"
 else
   set -u
@@ -55,18 +55,18 @@ else
   mkdir -p "${tag_path}"
   mkdir -p "${latest_path}"
 
-  _info "copying plugin binaries to ${tag_path}"
+  _info "copying snap cli binary to ${tag_path}"
   cp -rp "${build_path}/"* "${tag_path}"
-  _info "copying plugin binaries to ${latest_path}"
+  _info "copying snap cli binary to ${latest_path}"
   cp -rp "${build_path}/"* "${latest_path}"
 fi
 
 release_path="${SNAP_PATH:-"${__proj_dir}/release"}"
 mkdir -p "${release_path}"
 
-_info "moving plugin binaries to ${release_path}"
+_info "moving snap cli binary to ${release_path}"
 
-for file in "${build_path}"/**/*/snap-plugin-* ; do
+for file in "${build_path}"/**/*/snaptel ; do
   filename="${file##*/}"
   parent="${file%/*}"
   arch="${parent##*/}"
