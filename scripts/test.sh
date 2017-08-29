@@ -96,5 +96,5 @@ elif [[ $TEST_TYPE == "large" ]]; then
     . "${__dir}/large.sh"
   fi
 elif [[ $TEST_TYPE == "build" ]]; then
-  "${__dir}/build.sh"
+  "${__dir}/build_all.sh"
 fi
