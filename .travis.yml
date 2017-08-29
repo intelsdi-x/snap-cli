@@ -37,29 +37,18 @@ deploy:
   region: us-west-2
   skip_cleanup: true
   local-dir: s3
-  upload-dir: plugins
+  upload-dir: snap-cli
   acl: public_read
   on:
     repo: intelsdi-x/snap-cli
     branch: master
     condition: $TEST_TYPE = "build" && $TRAVIS_GO_VERSION =~ ^1\.8(|\.[0-9]+)$
-- provider: s3
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  bucket: snap.ci.snap-telemetry.io
-  region: us-west-2
-  skip_cleanup: true
-  local-dir: s3
-  upload-dir: plugins
-  acl: public_read
-  on:
-    repo: intelsdi-x/snap-cli
-    tags: true
-    condition: $TEST_TYPE = "build" && $TRAVIS_GO_VERSION =~ ^1\.8(|\.[0-9]+)$
 - provider: releases
   api_key: $GITHUB_API_KEY
   file:
-    - release/snap-cli_linux_x86_64
+    - release/snaptel_linux_x86_64.tar.gz
+    - release/snaptel_darwin_x86_64.tar.gz
+    - release/snaptel_windows_x86_64.tar.gz
   skip_cleanup: true
   on:
     repo: intelsdi-x/snap-cli

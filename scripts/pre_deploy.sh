@@ -32,7 +32,7 @@ build_path="${__proj_dir}/build"
 _info "build_path: ${build_path}"
 _debug "$(find "${build_path}")"
 
-plugin_name=snaptel
+plugin_name="${__proj_dir##*/}"
 git_sha=$(git log --pretty=format:"%H" -1)
 s3_path="${__proj_dir}/s3/${plugin_name}"
 
@@ -64,15 +64,17 @@ fi
 release_path="${SNAP_PATH:-"${__proj_dir}/release"}"
 mkdir -p "${release_path}"
 
-_info "moving snap cli binary to ${release_path}"
+_info "packaging snap cli binary to ${release_path}"
 
-for file in "${build_path}"/**/*/snaptel ; do
-  filename="${file##*/}"
+filename=snaptel
+
+for file in "${build_path}"/**/* ; do
+  arch="${file##*/}"
   parent="${file%/*}"
-  arch="${parent##*/}"
-  parent="${parent%/*}"
   os="${parent##*/}"
-  cp "${file}" "${release_path}/${filename}_${os}_${arch}"
+
+  tar -cvzf "${release_path}/${filename}_${os}_${arch}.tar.gz" -C "${file}" . > /dev/null
+
 done
 
 _debug "$(find "${build_path}")"
